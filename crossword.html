@@ -1,172 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Daily Crossword</title>
+<meta charset="UTF-8">
+<title>Crossword</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f4f4f4;
+  }
 
-    <style>
-        body {
-            background-color: #f4f1e8;
-            font-family: "Times New Roman", serif;
-            text-align: center;
-        }
+  h1 {
+    margin-top: 20px;
+  }
 
-        h1 {
-            margin-top: 20px;
-        }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 50px);
+    grid-gap: 2px;
+    justify-content: center;
+    margin-top: 30px;
+  }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(8, 40px);
-            grid-template-rows: repeat(8, 40px);
-            justify-content: center;
-            margin-top: 30px;
-        }
+  input {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 22px;
+    text-transform: uppercase;
+    border: 1px solid #333;
+  }
 
-        .cell {
-            width: 40px;
-            height: 40px;
-            border: 1px solid black;
-            text-transform: uppercase;
-            font-size: 16px;
-            text-align: center;
-        }
+  .black {
+    background: black;
+    pointer-events: none;
+  }
 
-        .black {
-            background-color: black;
-        }
-
-        input {
-            width: 38px;
-            height: 38px;
-            border: none;
-            text-align: center;
-            font-size: 16px;
-            font-family: "Times New Roman", serif;
-            background: transparent;
-        }
-
-        .clues {
-            margin-top: 30px;
-            width: 60%;
-            margin-left: auto;
-            margin-right: auto;
-            text-align: left;
-        }
-    </style>
+  button {
+    margin-top: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+  }
+</style>
 </head>
 
 <body>
 
-<h1>Daily Newspaper Crossword</h1>
-<p>Progress vs. Stability Edition</p>
+<h1>Crossword Puzzle</h1>
 
-<!-- GRID -->
-<div class="grid">
+<div class="grid" id="grid"></div>
 
-    <!-- Row 1 -->
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
+<button onclick="checkAnswers()">Check Answers</button>
 
-    <!-- Row 2 -->
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
+<script>
+// 5x5 crossword layout
+// "_" = letter box, "#" = black square
+const puzzle = [
+  ["H","E","L","L","O"],
+  ["A","#","#","#","A"],
+  ["P","L","A","N","E"],
+  ["P","#","#","#","T"],
+  ["Y","E","S","S","S"]
+];
 
-    <!-- Row 3 -->
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
+// correct answers (same as puzzle for now)
+const answers = puzzle;
 
-    <!-- Row 4 -->
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
+const grid = document.getElementById("grid");
 
-    <!-- Row 5 -->
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
+// build grid
+for (let r = 0; r < puzzle.length; r++) {
+  for (let c = 0; c < puzzle[r].length; c++) {
 
-    <!-- Row 6 -->
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
+    const cell = document.createElement("input");
 
-    <!-- Row 7 -->
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
+    if (puzzle[r][c] === "#") {
+      cell.classList.add("black");
+      cell.disabled = true;
+      cell.value = "";
+    } else {
+      cell.maxLength = 1;
+      cell.dataset.answer = answers[r][c];
+    }
 
-    <!-- Row 8 -->
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell"><input maxlength="1"></div>
-    <div class="cell black"></div>
+    grid.appendChild(cell);
+  }
+}
 
-</div>
-
-<!-- CLUES -->
-<div class="clues">
-
-<h3>Across / Theme Words</h3>
-<p>CLOCK — Time device that no longer advances</p>
-<p>STATIC — State of no change</p>
-<p>REPEAT — Something occurring again</p>
-<p>ROUTINE — Established pattern of behavior</p>
-<p>UNCHANGED — Remaining the same</p>
-<p>STILL — Without movement</p>
-<p>PROGRESS — Forward development</p>
-<p>ADVANCE — To move forward</p>
-<p>UPDATE — To bring current</p>
-<p>GROWTH — Increase over time</p>
-<p>SHIFT — Gradual change</p>
-<p>MEMORY — Stored experience</p>
-<p>FUTURE — Time yet to come</p>
-<p>PATTERN — Repeated design or behavior</p>
-<p>CYCLE — Repeating sequence</p>
-<p>ADAPT — To adjust to change</p>
-
-</div>
+// check answers
+function checkAnswers() {
+  const inputs = document.querySelectorAll("input:not(.black)");
+  inputs.forEach(input => {
+    if (input.value.toUpperCase() === input.dataset.answer) {
+      input.style.backgroundColor = "lightgreen";
+    } else {
+      input.style.backgroundColor = "salmon";
+    }
+  });
+}
+</script>
 
 </body>
 </html>
