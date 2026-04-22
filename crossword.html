@@ -2,99 +2,170 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Crossword</title>
+<title>Printed Screen Crossword</title>
+
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background: #f4f4f4;
-  }
+body {
+  margin: 0;
+  font-family: "Courier New", monospace;
+  background: #f5f5f0;
+  color: #111;
+  text-align: center;
+}
 
-  h1 {
-    margin-top: 20px;
-  }
+h1 {
+  margin-top: 20px;
+  letter-spacing: 2px;
+}
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(5, 50px);
-    grid-gap: 2px;
-    justify-content: center;
-    margin-top: 30px;
-  }
+.container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 30px;
+}
 
-  input {
-    width: 50px;
-    height: 50px;
-    text-align: center;
-    font-size: 22px;
-    text-transform: uppercase;
-    border: 1px solid #333;
-  }
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, 45px);
+  grid-template-rows: repeat(10, 45px);
+  gap: 2px;
+  background: #333;
+  padding: 5px;
+}
 
-  .black {
-    background: black;
-    pointer-events: none;
-  }
+/* CELLS */
+input {
+  width: 45px;
+  height: 45px;
+  text-align: center;
+  font-size: 18px;
+  text-transform: uppercase;
+  border: none;
+  outline: none;
+}
 
-  button {
-    margin-top: 20px;
-    padding: 10px 15px;
-    font-size: 16px;
-  }
+.cell {
+  background: white;
+}
+
+.black {
+  background: black;
+  pointer-events: none;
+}
+
+/* SIDE PANEL */
+.sidebar {
+  width: 250px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.sidebar h2 {
+  border-bottom: 1px solid #000;
+  padding-bottom: 5px;
+}
+
+button {
+  margin-top: 15px;
+  padding: 8px 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
 </style>
 </head>
 
 <body>
 
-<h1>Crossword Puzzle</h1>
+<h1>THE PRINTED CROSSWORD</h1>
 
-<div class="grid" id="grid"></div>
+<div class="container">
 
-<button onclick="checkAnswers()">Check Answers</button>
+  <!-- GRID -->
+  <div id="grid" class="grid"></div>
+
+  <!-- CLUES -->
+  <div class="sidebar">
+    <h2>Word Bank</h2>
+    <div id="wordBank"></div>
+
+    <button onclick="checkAnswers()">Check Puzzle</button>
+  </div>
+
+</div>
 
 <script>
-// 5x5 crossword layout
-// "_" = letter box, "#" = black square
-const puzzle = [
-  ["H","E","L","L","O"],
-  ["A","#","#","#","A"],
-  ["P","L","A","N","E"],
-  ["P","#","#","#","T"],
-  ["Y","E","S","S","S"]
-];
+// 10x10 grid setup
+const size = 10;
 
-// correct answers (same as puzzle for now)
-const answers = puzzle;
+// black grid (default all black then carve paths)
+let gridData = Array.from({length: size}, () =>
+  Array.from({length: size}, () => "#")
+);
 
+// helper to place words
+function placeWord(word, row, col, dir) {
+  for (let i = 0; i < word.length; i++) {
+    if (dir === "across") {
+      gridData[row][col + i] = word[i];
+    } else {
+      gridData[row + i][col] = word[i];
+    }
+  }
+}
+
+// PLACE WORDS (playable core crossword)
+placeWord("SCREEN", 0, 0, "across");
+placeWord("PRINT", 2, 0, "across");
+placeWord("SIDEWALK", 4, 0, "across");
+placeWord("CLOCK", 6, 0, "across");
+placeWord("ARTICLE", 8, 0, "across");
+
+placeWord("HOUSE", 0, 9, "down");
+placeWord("MAN", 3, 9, "down");
+
+// render grid
 const grid = document.getElementById("grid");
 
-// build grid
-for (let r = 0; r < puzzle.length; r++) {
-  for (let c = 0; c < puzzle[r].length; c++) {
+for (let r = 0; r < size; r++) {
+  for (let c = 0; c < size; c++) {
 
     const cell = document.createElement("input");
 
-    if (puzzle[r][c] === "#") {
+    if (gridData[r][c] === "#") {
       cell.classList.add("black");
       cell.disabled = true;
-      cell.value = "";
     } else {
+      cell.classList.add("cell");
+      cell.dataset.answer = gridData[r][c];
       cell.maxLength = 1;
-      cell.dataset.answer = answers[r][c];
     }
 
     grid.appendChild(cell);
   }
 }
 
+// word bank (your full list)
+const words = [
+  "SCREEN", "PRINT", "SIDEWALK", "CLOCK", "ARTICLE",
+  "GIFT", "ROOM", "HOUSE", "MAN", "MEMORY"
+];
+
+document.getElementById("wordBank").innerHTML =
+  words.map(w => "• " + w).join("<br>");
+
 // check answers
 function checkAnswers() {
-  const inputs = document.querySelectorAll("input:not(.black)");
+  const inputs = document.querySelectorAll(".cell");
+
   inputs.forEach(input => {
+    if (!input.value) return;
+
     if (input.value.toUpperCase() === input.dataset.answer) {
-      input.style.backgroundColor = "lightgreen";
+      input.style.background = "#b6f2b6";
     } else {
-      input.style.backgroundColor = "salmon";
+      input.style.background = "#f2b6b6";
     }
   });
 }
